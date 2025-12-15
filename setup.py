@@ -2,7 +2,7 @@ from setuptools import find_packages, setup
 
 setup(
     name='django-node-modules',
-    version='0.2.0',
+    version='0.3.0',
     packages=find_packages(),
     include_package_data=True,
     author_email='magilyas.doma.09@list.ru',
@@ -11,7 +11,8 @@ setup(
     install_requires=[
         'filetype>=1.2.0',
         'django==5.2.9',
-        'django-static-engine>=0.1.6, <0.2.0'
+        'django-static-engine>=0.1.7, <0.2.0',
+        'requests',
     ],
     license='MIT',
     classifiers=[

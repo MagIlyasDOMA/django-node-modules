@@ -2,7 +2,7 @@ from setuptools import find_packages, setup
 
 setup(
     name='django-node-modules',
-    version='0.3.1',
+    version='1.0.0',
     packages=find_packages(),
     include_package_data=True,
     author_email='magilyas.doma.09@list.ru',
@@ -16,7 +16,7 @@ setup(
     ],
     license='MIT',
     classifiers=[
-        'Development Status :: 4 - Beta',
+        'Development Status :: 5 - Production/Stable',
         'Intended Audience :: Developers',
         'Intended Audience :: System Administrators',
         'Intended Audience :: Information Technology',

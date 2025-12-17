@@ -14,6 +14,8 @@
 - **Безопасность**: Контроль доступа к пакетам через `ALLOWED_NODE_MODULES`
 - **Поддержка типов файлов**: JavaScript (модули и обычные), CSS
 - **Гибкая настройка**: Рекурсивный поиск, кастомные пути, дополнительные атрибуты
+- **Специальная поддержка hrenpack пакетов**: Упрощенное подключение hrenpack_js и hrenpack-theme-style
+- **Кеширование конфигураций**: Оптимизация загрузки конфигов популярных пакетов
 
 ## 📦 Установка
 
@@ -48,6 +50,9 @@ NODE_MODULES_DIR = BASE_DIR / 'node_modules'
 
 # Опционально: список разрешенных пакетов
 ALLOWED_NODE_MODULES = ['bootstrap', 'jquery']  # или '__all__' для всех
+
+# Опционально: кеширование конфига hrenpack-theme-style (по умолчанию True)
+CACHE_HRENPACK_THEME_STYLE_CONFIG = True
 ```
 
 3. Подключите URL:
@@ -66,7 +71,11 @@ urlpatterns = [
 ### Шаблонные теги
 #### Загрузите теги в шаблон:
 ```html
+<!-- Для стандартных пакетов -->
 {% load node_modules %}
+
+<!-- Для hrenpack пакетов -->
+{% load node_hrenpack %}
 ```
 
 ### Локальные пакеты
@@ -99,14 +108,76 @@ urlpatterns = [
 {% npm_node_package "jquery" integrity="sha256..." crossorigin="anonymous" defer=True %}
 ```
 
+## 🔧 Специальная поддержка hrenpack пакетов
+### hrenpack_js
+`hrenpack_js` — это пакет с набором полезных JavaScript утилит и компонентов.
+
+#### Подключение CSS
+```html
+{% hrenpack_js_css %}
+<!-- С указанием версии -->
+{% hrenpack_js_css version="1.2.0" %}
+```
+
+#### Подключение JavaScript
+```html
+<!-- Все скрипты -->
+{% hrenpack_js_scripts "all" %}
+
+<!-- Или -->
+{% hrenpack_js_scripts %}
+
+<!-- Только указанные скрипты -->
+{% hrenpack_js_scripts "include" "utils.js" "components.js" %}
+
+<!-- Все, кроме указанных -->
+{% hrenpack_js_scripts "exclude" "deprecated.js" %}
+
+<!-- С указанием версии -->
+{% hrenpack_js_scripts "all" version="1.2.0" %}
+```
+
+### hrenpack-theme-style
+`hrenpack-theme-style` — это пакет с темами и стилями для интерфейсов.
+
+#### Подключение CSS
+```html
+{% hrenpack_theme_style_css %}
+```
+
+#### Подключение JavaScript
+```html
+<!-- Базовая конфигурация (только основной скрипт) -->
+{% hrenpack_theme_style_css "base" %}
+
+<!-- Поддержка темной темы -->
+{% hrenpack_theme_style_css "dark_theme" %}
+
+<!-- Стили для форм -->
+{% hrenpack_theme_style_css "form" %}
+
+<!-- Полная конфигурация (все стили) -->
+{% hrenpack_theme_style_css "full" %}
+
+<!-- Или -->
+{% hrenpack_theme_style_css %}
+```
+**Примечание:** JavaScript темы по умолчанию включают необходимые зависимости из hrenpack_js, если не указан параметр no_deps=True.
+
+### Автоматическое определение источника
+Пакет автоматически определяет, использовать ли локальную версию или CDN:
+
+- Если пакет существует локально в node_modules и не указана версия → используется локальная версия
+- В противном случае → используется CDN версия
+
 ## 🔧 Конфигурация
 ### Настройки приложения
 
-
-Настройка | Тип | По умолчанию | Описание
------------------------------------------
-`NODE_MODULES_DIR` | `pathlib.Path` | **Обязательно** | Путь к директории `node_modules`
-`ALLOWED_NODE_MODULES` | `list` или `str` | `'__all__'` | Список разрешенных пакетов или `__all__`
+|              Настройка              |       Тип        |  По умолчанию   | Описание                                  |
+|:-----------------------------------:|:----------------:|:---------------:|:-----------------------------------------:|
+|         `NODE_MODULES_DIR`          |  `pathlib.Path`  | **Обязательно** | Путь к директории `node_modules`          |
+|       `ALLOWED_NODE_MODULES`        | `list` или `str` |   `'__all__'`   | Список разрешенных пакетов или `__all__`  |
+| `CACHE_HRENPACK_THEME_STYLE_CONFIG` |      `bool`      |     `True`      | Кешировать ли конфиг hrenpack-theme-style |
 
 ### Безопасность
 По умолчанию доступны все пакеты. Для ограничения доступа:
@@ -115,30 +186,48 @@ ALLOWED_NODE_MODULES = [
     'bootstrap',
     'jquery',
     'font-awesome',
+    'hrenpack_js',
+    'hrenpack-theme-style',
     # только эти пакеты будут доступны
 ]
 ```
 
 ## 🎯 Примеры
-### Полный пример шаблона
+### Полный пример шаблона с hrenpack
 ```html
 <!DOCTYPE html>
 <html lang="en">
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>My Django App</title>
+    <title>My Django App with hrenpack</title>
+    
     {% load node_modules %}
+    {% load node_hrenpack %}
+    
+    <!-- Стандартные пакеты -->
     {% local_node_css_package "bootstrap" %}
-    {% npm_node_package "font-awesome" path="css/all.min.css" %}
+    
+    <!-- hrenpack темы -->
+    {% hrenpack_theme_style_css "light" %}
+    
+    <!-- CSS для hrenpack_js -->
+    {% hrenpack_js_css %}
 </head>
-<body>
+<body class="hrenpack-light-theme">
     <div id="app">
         <!-- Ваш контент -->
     </div>
     
+    <!-- Стандартные пакеты -->
     {% local_node_js_package "jquery" %}
     {% local_node_js_package "bootstrap" path="dist/js/bootstrap.bundle.min.js" %}
+    
+    <!-- hrenpack JavaScript -->
+    {% hrenpack_theme_style_scripts "light" %}
+    {% hrenpack_js_scripts "include" "utils.js" "components.js" %}
+    
+    <!-- Vue.js из CDN -->
     {% npm_node_package "vue" version="3.4.0" path="dist/vue.global.js" defer=True %}
 </body>
 </html>
@@ -155,9 +244,20 @@ my_project/
 │   │   │   └── js/
 │   │   │       └── bootstrap.bundle.min.js
 │   │   └── package.json
-│   └── jquery/
-│       └── dist/
-│           └── jquery.min.js
+│   ├── hrenpack_js/
+│   │   ├── index.js
+│   │   ├── utils.js
+│   │   ├── components.js
+│   │   ├── styles.css
+│   │   └── package.json
+│   └── hrenpack-theme-style/
+│       ├── light/
+│       │   ├── theme.css
+│       │   └── theme.js
+│       ├── dark/
+│       │   ├── theme.css
+│       │   └── theme.js
+│       └── package.json
 ├── my_project/
 │   ├── settings.py
 │   └── urls.py
@@ -166,7 +266,7 @@ my_project/
 ```
 
 ## 🔍 API Reference
-### Теги шаблонов
+### Стандартные теги шаблонов
 
 `local_node_js_package`
 ```python
@@ -191,10 +291,31 @@ npm_node_package(package_name: str,
                  **kwargs)
 ```
 
-### Утилиты
-- `remove_protocol_and_domain()` - Удаляет протокол и домен из URL
-- `change_dir()` - Контекстный менеджер для смены директории
-- `local_node_file()` - Открывает файл из node_modules
+### hrenpack теги шаблонов
+`hrenpack_js_css`
+```python
+hrenpack_js_css(version: Optional[str] = None)
+```
+
+`hrenpack_js_scripts`
+```python
+hrenpack_js_scripts(type: Literal['include', 'exclude', 'all'] = 'all', 
+                    *args, 
+                    version: Optional[str] = None)
+```
+
+`hrenpack_theme_style_css`
+```python
+hrenpack_theme_style_css(config: str = 'full', 
+                         version: Optional[str] = None)
+```
+
+`hrenpack_theme_style_scripts`
+```python
+hrenpack_theme_style_scripts(config: str = 'full', 
+                            version: Optional[str] = None, 
+                            no_deps: bool = False)
+```
 
 ## 🛠 Разработка
 ### Структура проекта
@@ -203,15 +324,25 @@ django_node_modules/
 ├── templates/
 │   └── django_node_modules/
 │       ├── local_node_packages.html
-│       └── npm_node_packages.html
+│       ├── npm_node_packages.html
+│       └── hrenpack/
+│           ├── css.html
+│           ├── hrenpack-theme-style.html
+│           └── hrenpack_js.html
 ├── templatetags/
 │   ├── __init__.py
-│   └── node_modules.py
+│   ├── node_modules.py        # Стандартные теги
+│   └── node_hrenpack.py       # hrenpack теги
 ├── __init__.py
 ├── apps.py
 ├── constants.py
 ├── urls.py
-├── utils.py
+├── utils/                     # Утилиты
+│   ├── __init__.py
+│   ├── base.py
+│   ├── hrenpack_base.py
+│   ├── hrenpack_js.py
+│   └── hrenpack_theme_style.py
 └── views.py
 ```
 
@@ -241,4 +372,4 @@ django_node_modules/
 - Документация: [https://github.com/magilyasdoma/django-node-modules/blob/main/README.md](https://github.com/magilyasdoma/django-node-modules/blob/main/README.md)
 - Исходный код: [https://github.com/magilyasdoma/django-node-modules](https://github.com/magilyasdoma/django-node-modules)
 - Трекер задач: [https://github.com/magilyasdoma/django-node-modules/issues](https://github.com/magilyasdoma/django-node-modules/issues)
-
+- hrenpack-theme-style конфиг: [https://raw.githubusercontent.com/magilyasdoma/hrenpack-theme-style/main/config-api.json](https://raw.githubusercontent.com/magilyasdoma/hrenpack-theme-style/main/config-api.json)

@@ -2,11 +2,14 @@ from setuptools import find_packages, setup
 
 setup(
     name='django-node-modules',
-    version='1.0.0',
+    version='1.0.1',
     packages=find_packages(),
     include_package_data=True,
     author_email='magilyas.doma.09@list.ru',
     author='Маг Ильяс DOMA (MagIlyasDOMA)',
+    description="A Django application for easily managing and serving files from local node_modules and remote NPM packages directly from Django templates",
+    long_description=open('README.md', encoding='utf-8').read(),
+    long_description_content_type="text/markdown",
     url='https://github.com/magilyasdoma/django-node-modules',
     install_requires=[
         'filetype>=1.2.0',

@@ -2,7 +2,7 @@ from setuptools import find_packages, setup
 
 setup(
     name='django-node-modules',
-    version='1.0.3',
+    version='1.0.4',
     packages=find_packages(),
     include_package_data=True,
     author_email='magilyas.doma.09@list.ru',

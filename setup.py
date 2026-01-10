@@ -1,8 +1,9 @@
-from setuptools import find_packages, setup
+from pip_setuptools import find_packages, setup, requirements, clean
 
+clean()
 setup(
     name='django-node-modules',
-    version='1.0.5',
+    version='1.0.6',
     packages=find_packages(),
     include_package_data=True,
     author_email='magilyas.doma.09@list.ru',
@@ -11,12 +12,7 @@ setup(
     long_description=open('README.md', encoding='utf-8').read(),
     long_description_content_type="text/markdown",
     url='https://github.com/magilyasdoma/django-node-modules',
-    install_requires=[
-        'filetype>=1.2.0',
-        'django==5.2.9',
-        'django-static-engine>=0.1.7, <0.2.0',
-        'requests',
-    ],
+    install_requires=requirements(),
     license='MIT',
     classifiers=[
         'Development Status :: 5 - Production/Stable',
